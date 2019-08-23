@@ -2,10 +2,9 @@
 require("dotenv").config();
 
 var keys = require("./keys.js");
-var Spotify = require("node-spotify-api");
-var spotify = new Spotify(keys.spotify);
 var fs = require("fs");
 var axios = require("axios");
+var Spotify = require("node-spotify-api");
 
 var moment = require("moment");
 moment().format();
@@ -34,24 +33,6 @@ switch (commands) {
       "Invalid command. Please spotify-this-song, concert-this, movie-this or do-what-it-says"
     );
 }
-// console.log(liriRun(commands, userSearch));
-
-function spotifyThis(userSearch) {
-  if (!userSearch) {
-    userSearch = "All Rise";
-  }
-  spotify
-    .search({ type: "track", query: userSearch })
-    .then(function(response) {
-      for (var i = 0; i < 5; i++) {
-        var spotifyResult = response.data;
-        console.log(spotifyResult);
-      }
-    })
-    .catch(function(error) {
-      console.log(error);
-    });
-}
 
 // Bands In Town API
 function concertThis() {
@@ -75,6 +56,32 @@ function concertThis() {
   });
 }
 
+function spotifyThis(userSearch) {
+  var spotify = new Spotify(keys.spotify);
+  if (!userSearch) {
+    userSearch = "The Sign by Ace of Base";
+  }
+  spotify
+    .search({ type: "track", query: userSearch })
+    .then(function(response) {
+      console.log("\n======================");
+      console.log(
+        "\nArtist: " +
+          response.tracks.items[0].album.artists[0].name +
+          "\nSong: " +
+          response.tracks.items[0].name +
+          "\nSong preview: " +
+          response.tracks.items[0].href +
+          "\nAlbum: " +
+          response.tracks.items[0].album.name
+      );
+      console.log("\n======================");
+    })
+    .catch(function(err) {
+      console.log("Error: " + err);
+    });
+}
+
 // OMDB API
 function movieThis(userSearch) {
   if (userSearch === "") {
@@ -87,11 +94,9 @@ function movieThis(userSearch) {
         "&y=&plot=short&apikey=trilogy"
     )
     .then(function(response) {
-      console.log("==========================");
-      console.log(response.data);
-      console.log("==========================");
+      console.log("\n======================");
       console.log(
-        "MOVIE RESULT:" +
+        "\nMovie: " +
           response.data.Title +
           "\nYear: " +
           response.data.Year +
@@ -106,6 +111,7 @@ function movieThis(userSearch) {
           "\nActors: " +
           response.data.Actors
       );
+      console.log("\n======================");
     })
     .catch(function(error) {
       console.log("Movie Search Error: " + error);
@@ -113,4 +119,10 @@ function movieThis(userSearch) {
 }
 
 // Do What It Says Function
-// function doWhatItSays() {}
+function doWhatItSays() {
+  fs.readFile("random.txt", "utf8", function(err, data) {
+    if (err) {
+      return err;
+    }
+  });
+}
