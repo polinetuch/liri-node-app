@@ -1,9 +1,14 @@
 // Files required
 require("dotenv").config();
+
 var keys = require("./keys.js");
 var Spotify = require("node-spotify-api");
+var spotify = new Spotify(keys.spotify);
 var fs = require("fs");
 var axios = require("axios");
+
+var moment = require("moment");
+moment().format();
 
 // input variable that takes in argument 2 for search function
 var commands = process.argv[2];
@@ -31,24 +36,22 @@ switch (commands) {
 }
 // console.log(liriRun(commands, userSearch));
 
-function spotifyThis(musicSearch) {
-  var spotify = new Spotify(keys.spotify);
-
-  if (!musicSearch) {
-    musicSearch = "All Rise";
+function spotifyThis(userSearch) {
+  if (!userSearch) {
+    userSearch = "All Rise";
   }
-  spotify.search({ type: "track", query: musicSearch }, function(error, data) {
-    if (error) {
-      return console.log(error);
-    } else {
-      for (var i = 0; i < data.tracks.items.length; i++) {
-        var musicSearch = data.tracks.items[i];
-        console.log(musicSearch);
+  spotify
+    .search({ type: "track", query: userSearch })
+    .then(function(response) {
+      for (var i = 0; i < 5; i++) {
+        var spotifyResult = response.data;
+        console.log(spotifyResult);
       }
-    }
-  });
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
 }
-// console.log(spotifyThis());
 
 // Bands In Town API
 function concertThis() {
@@ -58,18 +61,56 @@ function concertThis() {
     artist +
     "/events?app_id=codingbootcamp";
   axios.get(queryURL).then(function(response) {
-    console.log(response.data[0].venue.name);
-    console.log(response.data[0].venue.country);
-    console.log("Venue location: " + response.data[0].venue.city);
-
-    var date = response.data[0].datetime;
-
-    console.log("Date of event: " + response.data[0].datetime);
+    console.log("==========================");
+    console.log(response);
+    console.log("==========================");
+    console.log(
+      "Venue name: " +
+        response.data[0].venue.name +
+        "\nVenue location: " +
+        response.data[0].venue.city +
+        "\nDate of the Event: " +
+        moment(response.data[0].datetime).format("MM-DD-YYYY")
+    );
   });
 }
 
 // OMDB API
-// function movieThis() {}
+function movieThis(userSearch) {
+  if (userSearch === "") {
+    userSearch = "Mr. Nobody";
+  }
+  axios
+    .get(
+      "https://www.omdbapi.com/?t=" +
+        userSearch +
+        "&y=&plot=short&apikey=trilogy"
+    )
+    .then(function(response) {
+      console.log("==========================");
+      console.log(response.data);
+      console.log("==========================");
+      console.log(
+        "MOVIE RESULT:" +
+          response.data.Title +
+          "\nYear: " +
+          response.data.Year +
+          "\nRating: " +
+          response.data.imdbRating +
+          "\nCountry: " +
+          response.data.Country +
+          "\nLanguage: " +
+          response.data.Language +
+          "\nPlot: " +
+          response.data.Plot +
+          "\nActors: " +
+          response.data.Actors
+      );
+    })
+    .catch(function(error) {
+      console.log("Movie Search Error: " + error);
+    });
+}
 
 // Do What It Says Function
 // function doWhatItSays() {}
