@@ -15,24 +15,26 @@ var commands = process.argv[2];
 var userSearch = process.argv.slice(3).join(" ");
 
 // function liriRun(commands, userSearch) {
-switch (commands) {
-  case "spotify-this-song":
-    spotifyThis(userSearch);
-    break;
-  case "concert-this":
-    concertThis(userSearch);
-    break;
-  case "movie-this":
-    movieThis(userSearch);
-    break;
-  case "do-what-it-says":
-    doWhatItSays();
-    break;
-  default:
-    console.log(
-      "Invalid command. Please spotify-this-song, concert-this, movie-this or do-what-it-says"
-    );
-}
+var liri = function(commands, userSearch) {
+  switch (commands) {
+    case "spotify-this-song":
+      spotifyThis(userSearch);
+      break;
+    case "concert-this":
+      concertThis(userSearch);
+      break;
+    case "movie-this":
+      movieThis(userSearch);
+      break;
+    case "do-what-it-says":
+      doWhatItSays();
+      break;
+    default:
+      console.log(
+        "Invalid command. Please spotify-this-song, concert-this, movie-this or do-what-it-says"
+      );
+  }
+};
 
 // Bands In Town API
 function concertThis() {
@@ -42,17 +44,19 @@ function concertThis() {
     artist +
     "/events?app_id=codingbootcamp";
   axios.get(queryURL).then(function(response) {
-    console.log("==========================");
-    console.log(response);
-    console.log("==========================");
-    console.log(
-      "Venue name: " +
-        response.data[0].venue.name +
-        "\nVenue location: " +
-        response.data[0].venue.city +
-        "\nDate of the Event: " +
-        moment(response.data[0].datetime).format("MM-DD-YYYY")
-    );
+    var concert = response.data;
+    // console.log(concert);
+    for (var i = 0; i < concert.length && i < 5; i++) {
+      console.log(
+        "\nVenue name: " +
+          concert[i].venue.name +
+          "\nVenue location: " +
+          concert[i].venue.city +
+          "\nDate of the Event: " +
+          moment(concert[i].datetime).format("MM-DD-YYYY") +
+          "\n=========================="
+      );
+    }
   });
 }
 
@@ -64,21 +68,25 @@ function spotifyThis(userSearch) {
   return spotify
     .search({ type: "track", query: userSearch })
     .then(function(response) {
-      console.log("\n======================");
-      console.log(
-        "\nArtist: " +
-          response.tracks.items[0].album.artists[0].name +
-          "\nSong: " +
-          response.tracks.items[0].name +
-          "\nSong preview: " +
-          response.tracks.items[0].href +
-          "\nAlbum: " +
-          response.tracks.items[0].album.name
-      );
-      console.log("\n======================");
+      var spotifyResult = response.tracks.items;
+      console.log(spotifyResult);
+      for (var j = 0; j < spotifyResult.length && j < 5; j++) {
+        var apiResponse = spotifyResult[j];
+        console.log(
+          "\n======================" +
+            "\nArtist: " +
+            apiResponse.artists[0].name +
+            "\nSong: " +
+            apiResponse.name +
+            "\nSong preview: " +
+            apiResponse.preview_url +
+            "\nAlbum: " +
+            apiResponse.album.name
+        );
+      }
     })
-    .catch(function(err) {
-      console.log("Error: " + err);
+    .catch(function(error) {
+      console.log("Error: " + error);
     });
 }
 
@@ -102,6 +110,8 @@ function movieThis(userSearch) {
           response.data.Year +
           "\nRating: " +
           response.data.imdbRating +
+          "\nRotten Tomatoes Rating: " +
+          response.data.Ratings[1].Value +
           "\nCountry: " +
           response.data.Country +
           "\nLanguage: " +
@@ -124,16 +134,24 @@ function doWhatItSays() {
     if (err) return err;
     console.log(data);
 
-    var commands = data.split("\n");
-    console.log({ commands });
+    var randomTxt = data.split(",");
 
-    commands.forEach(function(commandStr) {
-      var args = commandStr.split(", ");
-      var operation = args[0];
-      var searchTerm = args[1];
+    if (randomTxt.length == 2) {
+      liri(randomTxt[0], randomTxt[1]);
+    }
+    // var commands = data.split("\n");
+    // console.log({ commands });
 
-      if (operation === "spotify-this-song") spotifyThis(searchTerm);
-      else movieThis(searchTerm);
-    });
+    // commands.forEach(function(commandStr) {
+    //   var args = commandStr.split(", ");
+    //   var operation = args[0];
+    //   var searchTerm = args[1];
+
+    //   if (operation === "spotify-this-song") {
+    //     spotifyThis(searchTerm);
+    //   } else movieThis(searchTerm);
+    // });
   });
 }
+
+liri(commands, userSearch);
