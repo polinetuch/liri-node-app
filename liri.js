@@ -59,9 +59,9 @@ function concertThis() {
 function spotifyThis(userSearch) {
   var spotify = new Spotify(keys.spotify);
   if (!userSearch) {
-    userSearch = "The Sign by Ace of Base";
+    userSearch = "Shotgun";
   }
-  spotify
+  return spotify
     .search({ type: "track", query: userSearch })
     .then(function(response) {
       console.log("\n======================");
@@ -84,7 +84,7 @@ function spotifyThis(userSearch) {
 
 // OMDB API
 function movieThis(userSearch) {
-  if (userSearch === "") {
+  if (!userSearch) {
     userSearch = "Mr. Nobody";
   }
   axios
@@ -121,8 +121,19 @@ function movieThis(userSearch) {
 // Do What It Says Function
 function doWhatItSays() {
   fs.readFile("random.txt", "utf8", function(err, data) {
-    if (err) {
-      return err;
-    }
+    if (err) return err;
+    console.log(data);
+
+    var commands = data.split("\n");
+    console.log({ commands });
+
+    commands.forEach(function(commandStr) {
+      var args = commandStr.split(", ");
+      var operation = args[0];
+      var searchTerm = args[1];
+
+      if (operation === "spotify-this-song") spotifyThis(searchTerm);
+      else movieThis(searchTerm);
+    });
   });
 }
