@@ -6,6 +6,8 @@
 
 ### View github page: https://github.com/polinetuch/liri-node-app
 
+### View app demo here: https://drive.google.com/open?id=1y62ypoMBCahtv95oe0Ot9adFsQMeJPSN
+
 ## How To Use:
 
 Use node liri.js then run one of the following commands, then add search text:
